@@ -5,6 +5,10 @@ const path = require('path')
 app.set('views', path.join(__dirname, 'views')); // ejs file location
 app.set('view engine', 'ejs'); //select view template engine
 
+app.use(express.static(path.join(__dirname, 'public'))); // to use static asset (design)
+
+
+
 // root 라우터
 app.get('/', function (req, res) {
     var title = "javascript"
@@ -19,6 +23,11 @@ app.get('/ejs', function (req, res) {
 // test 라우터
 app.get('/test', function(req, res) {
     res.send('Test')
+})
+
+
+app.get('/design', function(req, res) {
+    res.render('designTest');
 })
 
 app.listen(3000)
