@@ -1,0 +1,26 @@
+{
+  "name": "fintech_git",
+  "version": "1.0.0",
+  "description": "",
+  "main": "async.js",
+  "directories": {
+    "example": "example"
+  },
+  "dependencies": {
+    "request": "^2.88.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eleeje97/fintech-exercise.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eleeje97/fintech-exercise/issues"
+  },
+  "homepage": "https://github.com/eleeje97/fintech-exercise#readme"
+}
