@@ -5,10 +5,10 @@ var car01 = {
     ph: "500ph",
 
     start: function() {
-        console.log("engineisstarting");
+        console.log("engine is starting");
     },
     stop: function() {
-        console.log("engineisstoped");
+        console.log("engine is stoped");
     }
 }
 var car02 = {
@@ -16,10 +16,10 @@ var car02 = {
     ph: "600ph",
 
     start: function() {
-        console.log("engineisstarting");
+        console.log("engine is starting");
     },
     stop: function() {
-        console.log("engineisstoped");
+        console.log("engine is stoped");
     }
 }
 
