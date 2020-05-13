@@ -7,6 +7,9 @@ app.set('view engine', 'ejs'); //select view template engine
 
 app.use(express.static(path.join(__dirname, 'public'))); // to use static asset (design)
 
+// ajax로 데이터를 보내는 것을 허용하겠다.
+app.use(express.json());
+app.use(express.urlencoded({extended:false}));
 
 
 // root 라우터
@@ -35,5 +38,18 @@ app.get('/design', function(req, res) {
 app.get('/dataSend', function(req, res) {
     res.render('dataSend');
 })
+
+app.post('/getTime', function(req, res) {
+    var nowTime = new Date();
+    res.json(nowTime);
+})
+
+app.post('/getData', function(req, res) {
+    console.log(req.body);
+    var userData = req.body.userInputData;
+    console.log('userData = ', userData)
+    res.json(userData + "!!!!!!")
+})
+
 
 app.listen(3000)
