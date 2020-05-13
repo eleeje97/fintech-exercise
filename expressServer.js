@@ -25,9 +25,15 @@ app.get('/test', function(req, res) {
     res.send('Test')
 })
 
-
+// design
 app.get('/design', function(req, res) {
     res.render('designTest');
+})
+
+
+// dataSend 라우터
+app.get('/dataSend', function(req, res) {
+    res.render('dataSend');
 })
 
 app.listen(3000)
