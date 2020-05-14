@@ -202,4 +202,38 @@ app.post('/login', function(req, res) {
 })
 
 
+// main 페이지
+app.get('/main', function(req, res) {
+    res.render('main');
+})
+
+
+// list: 사용자 정보 조회
+app.post('/list', function(req, res) {
+    
+    var option = {
+        method : "GET",
+        url : "https://testapi.openbanking.or.kr/v2.0/user/me",
+        headers : {
+            'Authorization' : 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIxMTAwNzU4NzY5Iiwic2NvcGUiOlsiaW5xdWlyeSIsImxvZ2luIiwidHJhbnNmZXIiXSwiaXNzIjoiaHR0cHM6Ly93d3cub3BlbmJhbmtpbmcub3Iua3IiLCJleHAiOjE1OTcxMzMzNjIsImp0aSI6IjVlMjg2YjY2LTA5NWItNGZhOC1hY2Y5LTkyODg0NTNiOTZjZiJ9.ThAdf_YN8M6m1K0CEFd9KVBs0syXayv70PCDSa7X98E' // accessToken
+        },
+        qs : {
+            'user_seq_no' : 1100758769 // user_seq_no
+        }
+    }
+
+    request(option, function(err, response, body) {
+        if(err) {
+            console.error(err);
+            throw err;
+        }
+        else {
+            var accessRequestResult = JSON.parse(body);
+            console.log(accessRequestResult);
+            res.json(accessRequestResult);
+        }
+    })
+
+})
+
 app.listen(3000)
