@@ -4,6 +4,10 @@ const path = require('path')
 
 var request = require('request');
 var mysql = require('mysql');
+var jwt = require('jsonwebtoken');
+
+var auth = require('./lib/auth');
+
 
 app.set('views', path.join(__dirname, 'views')); // ejs file location
 app.set('view engine', 'ejs'); //select view template engine
@@ -65,11 +69,21 @@ app.post('/getData', function(req, res) {
 })
 
 
+// authTest
+app.post('/authTest', auth, function(req, res) {
+    res.json(req.decoded);
+})
+
+
+
+
 //------------------ service start ------------------//
+// signup 페이지
 app.get('/signup', function(req, res) {
     res.render('signup');
 })
 
+// authResult 사용자 인증, 토큰 요청
 app.get('/authResult', function(req, res) {
     var authCode = req.query.code
     console.log(authCode);
@@ -106,17 +120,86 @@ app.get('/authResult', function(req, res) {
 })
 
 
+// signup 동작
 app.post('/signup', function(req, res) {
     // data req get db store
-    var userName = req.body.userName
-    var userEmail = req.body.userEmail
-    var userPassword = req.body.userPassword
-    var userAccessToken = req.body.userAccessToken
-    var userRefreshToken = req.body.userRefreshToken
-    var userSeqNo = req.body.userSeqNo
+    var userName = req.body.userName;
+    var userEmail = req.body.userEmail;
+    var userPassword = req.body.userPassword;
+    var userAccessToken = req.body.userAccessToken;
+    var userRefreshToken = req.body.userRefreshToken;
+    var userSeqNo = req.body.userSeqNo;
 
     console.log(userName, userAccessToken, userSeqNo);
 
+
+    var sql ="INSERT INTO fintech.user (name, email, password, accesstoken, refreshtoken, userseqno) VALUES (?,?,?,?,?,?)"
+    connection.query(
+        sql, // execute sql
+        [userName, userEmail, userPassword, userAccessToken, userRefreshToken, userSeqNo], // ? <- value
+        function(err, result) {
+            if(err) {
+                console.error(err);
+                res.json(0);
+                throw err;
+            }
+            else {
+                res.json(1);
+            }
+        }
+    )
 })
+
+// login 페이지
+app.get('/login', function(req, res) {
+    res.render('login');
+})
+
+// login 동작
+app.post('/login', function(req, res) {
+    var userEmail = req.body.userEmail;
+    var userPassword = req.body.userPassword;
+
+    var sql = "SELECT * FROM user WHERE email = ?";
+    connection.query(sql, [userEmail], function(err, result) {
+        if(err) {
+            console.error(err);
+            res.json(0);
+            throw err;
+        }
+        else {
+            if(result.length == 0) {
+                res.json(3)
+            }
+            else {
+                var dbPassword = result[0].password;
+                if(dbPassword == userPassword) {
+                    // login success
+                    var tokenKey = "f@i#n%tne#ckfhlafkd0102test!@#%";
+                    jwt.sign(
+                        {
+                            userId : result[0].id,
+                            userEmail : result[0].email
+                        },
+                        tokenKey,
+                        {
+                            expiresIn : '10d',
+                            issuer : 'fintech.admin',
+                            subject : 'user.login.info'
+                        },
+                        function(err, token){
+                            console.log('로그인 성공', token)
+                            res.json(token)
+                        }
+                    )
+                }
+                else {
+                    res.json(2);
+                }
+            }
+        }
+    })
+})
+
 
 app.listen(3000)
