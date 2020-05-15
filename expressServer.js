@@ -250,12 +250,14 @@ app.post('/list', auth, function(req, res) {
 
 // balance 페이지 : 잔액조회
 app.get('/balance', function(req, res) {
+    res.render('balance');
 
-    var option = {
+    /*
+        var option = {
         method = "GET"
     }
     request()
-    res.render();
+    */
 })
 
 
