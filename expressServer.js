@@ -7,6 +7,7 @@ var mysql = require('mysql');
 var jwt = require('jsonwebtoken');
 
 var auth = require('./lib/auth');
+var dateFormat = require('dateformat');
 
 
 app.set('views', path.join(__dirname, 'views')); // ejs file location
@@ -263,7 +264,8 @@ app.post('/balance', auth, function(req, res) {
     var fin_use_num = req.body.fin_use_num;
     
     // tran_dtime
-    현재시간 14자리 형식
+    var now = new Date();
+    var now_time = dateFormat(now, "yyyymmddHHMMss")
     
     var userId = req.decoded.userId;
     var sql = "SELECT * FROM user WHERE id = ?" // DB에서 accessToken 가져오기
@@ -284,7 +286,7 @@ app.post('/balance', auth, function(req, res) {
                 qs : {
                     bank_tran_id : transId,
                     fintech_use_num : fin_use_num,
-                    tran_dtime : '20200515113300'
+                    tran_dtime : now_time
                 }
             }
         
@@ -304,5 +306,138 @@ app.post('/balance', auth, function(req, res) {
 })
 
 
+// transactionlist 동작 : 거래내역 가져오기
+app.post('/transactionlist', auth, function(req, res) {
+    // 은행거래고유번호 생성
+    var countnum = Math.floor(Math.random() * 1000000000) + 1;
+    var transId = "T991628980U" + countnum;
+    
+    // fin_use_num
+    var fin_use_num = req.body.fin_use_num;
+    
+    // tran_dtime : 현재시간 14자리 형식
+    var now = new Date();
+    var now_time = dateFormat(now, "yyyymmddHHMMss")
+    
+    var userId = req.decoded.userId;
+    var sql = "SELECT * FROM user WHERE id = ?" // DB에서 accessToken 가져오기
+    connection.query(sql, [userId], function(err, result) {
+        if(err) {
+            console.error(err);
+            throw err;
+        }
+        else {
+            console.log(result);
+
+            var option = {
+                method : "GET",
+                url : "https://testapi.openbanking.or.kr/v2.0/account/transaction_list/fin_num",
+                headers : {
+                    Authorization : 'Bearer ' + result[0].accesstoken // accessToken
+                },
+                qs : {
+                    bank_tran_id : transId,
+                    fintech_use_num : fin_use_num,
+                    inquiry_type : 'A',
+                    inquiry_base : 'D',
+                    from_date : '20200511',
+                    to_date : '20200515',
+                    sort_order : 'D',
+                    tran_dtime : now_time
+                }
+            }
+        
+            request(option, function(err, response, body) {
+                if(err) {
+                    console.error(err);
+                    throw err;
+                }
+                else {
+                    var transactionResult = JSON.parse(body);
+                    console.log(transactionResult);
+                    res.json(transactionResult);
+                }
+            })
+        }
+    })
+})
+
+
+// QR코드 페이지
+app.get('/qrcode', function(req, res) {
+    res.render('qrcode');
+})
+
+// QR코드 Reader 페이지
+app.get('/qr', function(req, res) {
+    res.render('qrReader');
+})
+
+
+app.post('/withdraw', auth, function(req, res) {
+    // 은행거래고유번호 생성
+    var countnum = Math.floor(Math.random() * 1000000000) + 1;
+    var transId = "T991628980U" + countnum;
+    
+    // fin_use_num
+    var fin_use_num = req.body.fin_use_num;
+    
+    // tran_dtime : 현재시간 14자리 형식
+    var now = new Date();
+    var now_time = dateFormat(now, "yyyymmddHHMMss")
+    
+    var userId = req.decoded.userId;
+    var sql = "SELECT * FROM user WHERE id = ?" // DB에서 accessToken 가져오기
+    connection.query(sql, [userId], function(err, result) {
+        if(err) {
+            console.error(err);
+            throw err;
+        }
+        else {
+            console.log(result);
+
+            var option = {
+                method : "POST",
+                url : "https://testapi.openbanking.or.kr/v2.0/transfer/withdraw/fin_num",
+                headers : {
+                    'Content-Type' : 'application/json; charset=UTF-8',
+                    Authorization : 'Bearer ' + result[0].accesstoken // accessToken
+                },
+                json : {
+                    "bank_tran_id" : transId,
+                    "cntr_account_type" : "N",
+                    "cntr_account_num": "3638010471",
+                    "dps_print_content": "쇼핑몰환불",
+                    "fintech_use_num": fin_use_num,
+                    "wd_print_content": "오픈뱅킹출금",
+                    "tran_amt":"1000",
+                    "tran_dtime": "20200515145000",
+                    "req_client_name": "홍길동",
+                    "req_client_bank_code" : "097",
+                    "req_client_account_num" : "1101230000678",
+                    "req_client_num": "HONGGILDONG1234",
+                    "transfer_purpose" : "ST",
+                    "sub_frnc_name": "하위가맹점",
+                    "sub_frnc_num": "123456789012",
+                    "sub_frnc_business_num": "1234567890",
+                    "recv_client_name": "이다은",
+                    "recv_client_bank_code": "097",
+                    "recv_client_account_num": "232000067812"
+                }
+            }
+        
+            request(option, function(err, response, body) {
+                if(err) {
+                    console.error(err);
+                    throw err;
+                }
+                else {
+                    console.log(body);
+                    res.json(1);
+                }
+            })
+        }
+    })
+})
 
 app.listen(3000)
