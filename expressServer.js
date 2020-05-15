@@ -210,7 +210,7 @@ app.get('/main', function(req, res) {
 
 // list: 사용자 정보 조회
 app.post('/list', auth, function(req, res) {
-    //api response body
+
     var userId = req.decoded.userId;
     var sql = "SELECT * FROM user WHERE id = ?"
     connection.query(sql, [userId], function(err, result) {
@@ -251,14 +251,58 @@ app.post('/list', auth, function(req, res) {
 // balance 페이지 : 잔액조회
 app.get('/balance', function(req, res) {
     res.render('balance');
-
-    /*
-        var option = {
-        method = "GET"
-    }
-    request()
-    */
 })
+
+// balance 동작 : 잔액 가져오기
+app.post('/balance', auth, function(req, res) {
+    // 은행거래고유번호 생성
+    var countnum = Math.floor(Math.random() * 1000000000) + 1;
+    var transId = "T991628980U" + countnum;
+    
+    // fin_use_num
+    var fin_use_num = req.body.fin_use_num;
+    
+    // tran_dtime
+    현재시간 14자리 형식
+    
+    var userId = req.decoded.userId;
+    var sql = "SELECT * FROM user WHERE id = ?" // DB에서 accessToken 가져오기
+    connection.query(sql, [userId], function(err, result) {
+        if(err) {
+            console.error(err);
+            throw err;
+        }
+        else {
+            console.log(result);
+
+            var option = {
+                method : "GET",
+                url : "https://testapi.openbanking.or.kr/v2.0/account/balance/fin_num",
+                headers : {
+                    Authorization : 'Bearer ' + result[0].accesstoken // accessToken
+                },
+                qs : {
+                    bank_tran_id : transId,
+                    fintech_use_num : fin_use_num,
+                    tran_dtime : '20200515113300'
+                }
+            }
+        
+            request(option, function(err, response, body) {
+                if(err) {
+                    console.error(err);
+                    throw err;
+                }
+                else {
+                    var balanceResult = JSON.parse(body);
+                    console.log(balanceResult);
+                    res.json(balanceResult);
+                }
+            })
+        }
+    })
+})
+
 
 
 app.listen(3000)
